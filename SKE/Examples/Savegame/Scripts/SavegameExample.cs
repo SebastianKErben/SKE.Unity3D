@@ -47,15 +47,14 @@ namespace SKE.Examples.Savegame {
             if (mySaveSystem.DataAccess == null)
                 mySaveSystem.DataAccess = new DictionaryDataAccess();
 
-            // If the SaveSystem doesn't have a SaveData dataset, we'll
-            // create a new one;
-            if (mySaveSystem.CurrentSaveData == null) {
-                mySaveData = new SimpleSaveData();
-                mySaveSystem.CurrentSaveData = mySaveData;
-            }
-            // if there is already a SaveData dataset, we'll get it.
-            else
+            mySaveData = new SimpleSaveData();
+
+            // If there is already a SaveData dataset, we'll get it.
+            if (mySaveSystem.CurrentSaveData != null)
                 mySaveData = mySaveSystem.GetLoadedSave<SimpleSaveData>();
+            
+            // Inject mySaveData back to mySaveSystem.
+            mySaveSystem.CurrentSaveData = mySaveData;
 
             // Turn on AutoSave; we can still use the Save method to create
             // own saves.

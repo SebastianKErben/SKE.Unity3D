@@ -41,6 +41,7 @@ namespace SKE.Unity3D.Savegame {
     /// </summary>
     public class SaveSystem : SingletonEternal<SaveSystem> {
         bool autosave;
+        readonly SaveOperator currentSaveOperator = new SaveOperator();
 
         /// <summary>
         /// Gets or sets a value indicating whether this 
@@ -69,24 +70,15 @@ namespace SKE.Unity3D.Savegame {
 		/// <value>The current save data.</value>
 		public SaveData CurrentSaveData {
 			set {
-				if (CurrentSaveOperator != null)
-					CurrentSaveOperator.CurrentSaveData = value;
+				if (currentSaveOperator != null)
+					currentSaveOperator.CurrentSaveData = value;
 			}
 			get {
-				return CurrentSaveOperator == null ? 
+				return currentSaveOperator == null ? 
 					null :
-					CurrentSaveOperator.CurrentSaveData;
+					currentSaveOperator.CurrentSaveData;
 			}
 		}
-
-        /// <summary>
-        /// Gets or sets the current SaveOperator.
-        /// </summary>
-        /// <value>The current save operator.</value>
-        public SaveOperator CurrentSaveOperator {
-            set;
-            get;
-        }
 
         /// <summary>
         /// Gets or sets the SaveOperators DataAccess.
@@ -94,13 +86,13 @@ namespace SKE.Unity3D.Savegame {
         /// <value>The data access.</value>
         public ISaveDataAccess DataAccess {
             set {
-                if (CurrentSaveOperator != null)
-                    CurrentSaveOperator.DataAccess = value;
+                if (currentSaveOperator != null)
+                    currentSaveOperator.DataAccess = value;
             }
             get {
-                return CurrentSaveOperator == null ?
+                return currentSaveOperator == null ?
                     null :
-                    CurrentSaveOperator.DataAccess;
+                    currentSaveOperator.DataAccess;
             }
         }
 		
@@ -110,7 +102,7 @@ namespace SKE.Unity3D.Savegame {
         /// <returns>The loaded save.</returns>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
         public T GetLoadedSave<T>() where T : SaveData {
-            return CurrentSaveOperator.CurrentSaveData as T;
+            return currentSaveOperator.CurrentSaveData as T;
         }
 
         /// <summary>
@@ -119,7 +111,7 @@ namespace SKE.Unity3D.Savegame {
         /// <param name="saveId">Save identifier.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
         public bool Load<T>(string saveId = "") where T : SaveData {
-            return CurrentSaveOperator.Load<T>(saveId);
+            return currentSaveOperator.Load<T>(saveId);
         }
 
         /// <summary>
@@ -127,37 +119,29 @@ namespace SKE.Unity3D.Savegame {
         /// </summary>
         /// <param name="saveId">Save identifier.</param>
         public bool Save(string saveId = "") {
-            return CurrentSaveOperator.Save(saveId);
-        }
-
-        /// <summary>
-        /// Will be called once the Singleton awakes the
-        /// first time.
-        /// </summary>
-        public override void SingletonAwake() {
-            CurrentSaveOperator = new SaveOperator();
+            return currentSaveOperator.Save(saveId);
         }
 
         void OnApplicationFocus() {
             if (autosave)
-                CurrentSaveOperator.Save("auto");
+                currentSaveOperator.Save("auto");
         }
 
         void OnApplicationPause() {
             if (autosave)
-                CurrentSaveOperator.Save("auto");
+                currentSaveOperator.Save("auto");
         }
 
         void OnApplicationQuit() {
             if (autosave) {
-                CurrentSaveOperator.Save("auto");
+                currentSaveOperator.Save("auto");
                 SceneManager.activeSceneChanged -= SaveAuto;
             }
         }
 
         void SaveAuto(Scene previousScene, Scene nextScene) {
             if (autosave)
-                CurrentSaveOperator.Save("auto");
+                currentSaveOperator.Save("auto");
         }
     }
 

@@ -39,6 +39,8 @@ namespace SKE.Unity3D.InputHelper {
         Ray inputRay;
         Camera raycastCamera;
         RaycastHit rayHit;
+        Vector3 screenCoordinates;
+        Vector3 worldCoordinates;
 
 		/// <summary>
 		/// Object touched event handler.
@@ -83,6 +85,16 @@ namespace SKE.Unity3D.InputHelper {
                 return raycastCamera ?? Camera.main;
             }
         }
+
+        /// <summary>
+        /// Gets the world coordinates of the last touch.
+        /// </summary>
+        /// <value>The world coordinates.</value>
+        public Vector3 WorldCoordinates {
+            get {
+                return worldCoordinates;
+            }
+        }
 		
         /// <summary>
         /// Checks the input for touch occurance.
@@ -98,12 +110,19 @@ namespace SKE.Unity3D.InputHelper {
         }
 
         void HandleTouch(Vector3 inputPosition) {
-            inputRay = RaycastCamera.ScreenPointToRay(inputPosition);
+            screenCoordinates.x = inputPosition.x;
+            screenCoordinates.y = inputPosition.y;
+            screenCoordinates.z = RaycastCamera.nearClipPlane;
+            worldCoordinates = RaycastCamera.ScreenToWorldPoint(screenCoordinates);
 
-            if (!Physics.Raycast(inputRay, out rayHit, depthThreshold))
-                return;
+            if (depthThreshold > 0f) {
+                inputRay = RaycastCamera.ScreenPointToRay(inputPosition);
 
-            ObjectTouched();
+                if (depthThreshold <= 0f || !Physics.Raycast(inputRay, out rayHit, depthThreshold))
+                    return;
+
+                ObjectTouched();
+            }
         }
     }
 }

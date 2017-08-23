@@ -33,6 +33,8 @@ namespace SKE.Examples.InputHelper {
 
 	// Simple example on how to use the Touching class.
 	public class TouchingExample : MonoBehaviour {
+        Vector3 lastCoordinates;
+
 		// Deregister on destruction.
 		void OnDestroy() {
 			Touching.ObjectTouched -= OnTouch;
@@ -51,6 +53,11 @@ namespace SKE.Examples.InputHelper {
 		// Check for touches.
 		void Update() {
 			Touching.Instance.CheckInput (0, true);
+
+            if (Touching.Instance.WorldCoordinates != lastCoordinates) {
+                lastCoordinates = Touching.Instance.WorldCoordinates;
+                print(lastCoordinates);
+            }
 		}
 	}
 }

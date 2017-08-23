@@ -39,7 +39,7 @@ namespace SKE.Unity3D.InputHelper {
     public class Swiping : SingletonEternal<Swiping> {
         public readonly SwipingOperator swipingOperator = new SwipingOperator();
 
-        Camera raycastCamera;
+        Camera currentCamera;
         float swipeTreshold;
 
 		/// <summary>
@@ -77,16 +77,16 @@ namespace SKE.Unity3D.InputHelper {
 		public static event SwipingUpEventHandler SwipingUp;
 
 		/// <summary>
-		/// Gets or sets the raycast camera.
+		/// Gets or sets the current camera.
 		/// </summary>
 		/// <value>The raycast camera.</value>
-		public Camera RaycastCamera {
+		public Camera CurrentCamera {
 			set {
-				raycastCamera = value;
+				currentCamera = value;
 			}
 
 			get {
-				return raycastCamera ?? Camera.main;
+                return currentCamera ?? Camera.main;
 			}
 		}
 
@@ -144,8 +144,7 @@ namespace SKE.Unity3D.InputHelper {
 		}
 
 		void RegisterSwipeEnd(ref Vector3 inputPosition) {
-			var swipeVector = swipingOperator.RegisterEnd(
-				RaycastCamera.ScreenPointToRay(inputPosition).origin);
+            var swipeVector = swipingOperator.RegisterEnd(CurrentCamera.ScreenToViewportPoint(inputPosition));
 
 			if (swipeVector.x > SwipeThreshold && SwipingRight != null)
 				SwipingRight();
@@ -159,8 +158,7 @@ namespace SKE.Unity3D.InputHelper {
 		}
 
         void RegisterSwipeStart(ref Vector3 inputPosition) {
-            swipingOperator.RegisterStart(
-                RaycastCamera.ScreenPointToRay(inputPosition).origin);
+            swipingOperator.RegisterStart(CurrentCamera.ScreenToViewportPoint(inputPosition));
         }        
     }
 

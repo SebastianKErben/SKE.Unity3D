@@ -42,6 +42,12 @@ namespace SKE.Unity3D.Pooling {
         /// </summary>
         public GameObject prefabReference;
 
+        /// <summary>
+        /// Is currently pooled.
+        /// </summary>
+        [SerializeField]
+        bool pooled;
+
 		/// <summary>
 		/// Gets or sets the pool.
 		/// </summary>
@@ -94,6 +100,7 @@ namespace SKE.Unity3D.Pooling {
             if (Storage == null) {
                 Storage = new GameObject().transform;
 				Storage.name = prefabReference.name;
+                UnityEngine.SceneManagement.SceneManager.activeSceneChanged += CleanOnSceneSwitch;
             }
 
             if (Pool == null)
@@ -114,6 +121,7 @@ namespace SKE.Unity3D.Pooling {
 
                     returnObject.transform.parent = null;
                     returnObject.gameObject.SetActive(true);
+                    returnObject.GetComponent<PoolObject<T>>().pooled = false;
 
                     return returnObject.gameObject;
                 }
@@ -140,11 +148,22 @@ namespace SKE.Unity3D.Pooling {
         /// Return this instance to the pool.
         /// </summary>
         public void Return() {
+            if (pooled)
+                return;
+
+            pooled = true;
+
             lock (Pool)
                 Pool.Enqueue(this);
             
             transform.parent = Storage;
             gameObject.SetActive(false);
+        }
+
+        void CleanOnSceneSwitch(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.Scene arg1) {
+            Storage = null;
+            Pool = null;
+            UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= CleanOnSceneSwitch;
         }
     }
 }
